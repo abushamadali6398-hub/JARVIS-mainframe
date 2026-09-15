@@ -189,7 +189,7 @@
         recognition.lang = 'en-IN';
         recognition.continuous = false;
 
-        function speak(text) {
+        function speakFallback(text) {
             const u = new SpeechSynthesisUtterance(text);
             u.rate = 1.05; u.pitch = 0.85;
             window.speechSynthesis.speak(u);
@@ -224,7 +224,14 @@
                 });
                 const data = await res.json();
                 logMsg(data.response, 'b-msg');
-                speak(data.response);
+                
+                // Yahan asli jadoo hoga (ElevenLabs Audio Play)
+                if (data.audio) {
+                    const audio = new Audio("data:audio/mp3;base64," + data.audio);
+                    audio.play();
+                } else {
+                    speakFallback(data.response); // Agar error aaye toh purani aawaz
+                }
             } catch (err) {
                 logMsg("Error: Mainframe connection lost.", 'err-msg');
             }
@@ -239,6 +246,6 @@
             statusText.innerText = "ONLINE (CLOUD READY)";
             micBtn.innerText = "ENGAGE VOICE PROTOCOL";
         };
-    </script>
+         </script>
 </body>
 </html>
