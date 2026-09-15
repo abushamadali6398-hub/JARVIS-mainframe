@@ -21,7 +21,7 @@ def chat():
     try:
         prompt = user_message + " (Reply exactly like J.A.R.V.I.S from Iron Man. Keep it short, futuristic, and professional.)"
         response = client.models.generate_content(
-            model='gemini-3.6flash',
+            model='gemini-3.6-flash',
             contents=prompt
         )
         return jsonify({"response": response.text.replace('*', '')})
