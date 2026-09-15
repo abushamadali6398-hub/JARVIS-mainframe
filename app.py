@@ -2,10 +2,15 @@ import os
 import base64
 import requests
 from flask import Flask, render_template, request, jsonify
+from google import genai
 
 app = Flask(__name__)
 
+# Dimag (Gemini) aur Aawaz (ElevenLabs) dono ki keys
+API_KEY = os.environ.get("GEMINI_API_KEY")
 ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY")
+
+client = genai.Client(api_key=API_KEY)
 
 @app.route('/')
 def home():
@@ -17,9 +22,15 @@ def chat():
     if not user_message: return jsonify({"response": "No message."})
     
     try:
-        # BYPASS TRICK: Google Gemini ko hatakar direct jawab likh diya
-        ai_response = "Hello Sir. I am J.A.R.V.I.S. My advanced voice module is now fully operational."
+        # 1. Gemini AI se J.A.R.V.I.S ka jawab sochna
+        prompt = user_message + " (Reply exactly like J.A.R.V.I.S from Iron Man. Keep it short, futuristic, and professional.)"
+        response = client.models.generate_content(
+            model='gemini-3.6-flash',
+            contents=prompt
+        )
+        ai_response = response.text.replace('*', '')
 
+        # 2. ElevenLabs se jawab ko Cinematic Aawaz (Audio) mein badalna
         audio_data = ""
         if ELEVENLABS_API_KEY:
             voice_id = "pNInz6obbfdqIcacX1tf" # Adam Voice
