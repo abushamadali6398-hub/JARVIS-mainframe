@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J.A.R.V.I.S. // GLOBAL MAINFRAME</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #02060a;
+            color: #00f3ff;
+            font-family: 'Share Tech Mono', monospace;
+            height: 100vh;
+            overflow: hidden;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        .scanner { position: fixed; top: 0; left: 0; width: 100%; height: 2px; background: rgba(0, 243, 255, 0.5); animation: scan 4s linear infinite; z-index: 100; pointer-events: none; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+
+        .mainframe {
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            grid-template-rows: 70px 1fr 80px;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        header {
+            grid-column: 1 / 4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(0, 243, 255, 0.4);
+            padding-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.6);
+        }
+        header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; letter-spacing: 3px; }
+        .sys-status { font-size: 1.1rem; color: #00ff66; text-shadow: 0 0 8px #00ff66; }
+
+        /* Panels */
+        .panel {
+            background: rgba(0, 15, 30, 0.6);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.05), 0 0 15px rgba(0, 243, 255, 0.1);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .panel::before { content: ''; position: absolute; top: 0; left: 0; width: 10px; height: 10px; border-top: 2px solid #00f3ff; border-left: 2px solid #00f3ff; }
+        .panel::after { content: ''; position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-bottom: 2px solid #00f3ff; border-right: 2px solid #00f3ff; }
+
+        .side-panel h3 { font-family: 'Orbitron', sans-serif; font-size: 0.9rem; margin-bottom: 10px; color: #ffab00; border-bottom: 1px dashed rgba(255,171,0,0.3); padding-bottom: 5px; }
+        .side-panel p { font-size: 0.9rem; margin-bottom: 8px; opacity: 0.8; }
+
+        /* Center Hologram & Arc Reactor */
+        .center-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .reactor-wrap {
+            width: 180px; height: 180px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .core {
+            width: 60px; height: 60px; background: #00f3ff; border-radius: 50%;
+            box-shadow: 0 0 40px #00f3ff, inset 0 0 15px #fff;
+            transition: 0.3s;
+            z-index: 5;
+        }
+        .ring {
+            position: absolute; border-radius: 50%; border: 2px dashed rgba(0, 243, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+        }
+        .r1 { width: 120px; height: 120px; animation: spin-rev 8s linear infinite; }
+        .r2 { width: 160px; height: 160px; border-style: solid; border-width: 3px; border-color: transparent #00f3ff transparent #00f3ff; animation: spin 12s linear infinite; }
+        .r3 { width: 190px; height: 190px; border-color: rgba(255, 171, 0, 0.4); animation: spin 20s linear infinite; }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spin-rev { 100% { transform: rotate(-360deg); } }
+
+        .reactor-wrap.active .core { background: #00ff66; box-shadow: 0 0 60px #00ff66, inset 0 0 20px #fff; }
+        .reactor-wrap.active .r2 { border-color: transparent #00ff66 transparent #00ff66; }
+
+        /* Terminal Window */
+        .terminal-box {
+            flex: 1; width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(0, 243, 255, 0.4);
+            padding: 15px; overflow-y: auto;
+            font-size: 1rem; margin-bottom: 15px;
+            box-shadow: inset 0 0 15px rgba(0, 243, 255, 0.1);
+        }
+        .terminal-box p { margin-bottom: 10px; line-height: 1.4; }
+        .u-msg { color: #ffffff; }
+        .b-msg { color: #00f3ff; text-shadow: 0 0 3px rgba(0,243,255,0.4); }
+        .err-msg { color: #ff3333; }
+
+        /* Controls */
+        .controls {
+            grid-column: 1 / 4;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .btn-engage {
+            background: rgba(0, 243, 255, 0.1);
+            color: #00f3ff;
+            border: 2px solid #00f3ff;
+            padding: 12px 50px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem; font-weight: bold;
+            letter-spacing: 3px; cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+            transition: 0.3s;
+        }
+        .btn-engage:hover {
+            background: #00f3ff; color: #02060a;
+            box-shadow: 0 0 30px #00f3ff, 0 0 50px #00f3ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="scanner"></div>
+    <div class="mainframe">
+        <header>
+            <h1>J.A.R.V.I.S. // STARK MAINFRAME</h1>
+            <div class="sys-status">STATUS: <span id="status-text">ONLINE (CLOUD READY)</span></div>
+        </header>
+
+        <div class="panel side-panel">
+            <h3>DIAGNOSTICS</h3>
+            <p>CPU CORE: OPTIMAL</p>
+            <p>NEURAL LINK: ACTIVE</p>
+            <p>SECURITY: LEVEL 10</p>
+            <p>ENCRYPTION: 4096-BIT</p>
+            <br>
+            <h3>SYSTEM LOGS</h3>
+            <p>> Initializing core matrix...</p>
+            <p>> Cloud bridge standby...</p>
+        </div>
+
+        <div class="panel center-display">
+            <div class="reactor-wrap" id="reactor">
+                <div class="ring r3"></div>
+                <div class="ring r2"></div>
+                <div class="ring r1"></div>
+                <div class="core"></div>
+            </div>
+            <div class="terminal-box" id="terminal">
+                <p class="b-msg">> Welcome back, Sir. All systems fully operational.</p>
+            </div>
+        </div>
+
+        <div class="panel side-panel">
+            <h3>CLOUD SYNC</h3>
+            <p>NODE: LOCALHOST // 5000</p>
+            <p>TARGET: 24/7 CLOUD RENDER</p>
+            <p>AUDIO SYNTH: GEMINI ENGINE</p>
+            <br>
+            <h3>QUICK COMMANDS</h3>
+            <p>> "System status"</p>
+            <p>> "Analyze network"</p>
+            <p>> "Open protocols"</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn-engage" id="mic-btn">ENGAGE VOICE PROTOCOL</button>
+        </div>
+    </div>
+
+    <script>
+        const micBtn = document.getElementById('mic-btn');
+        const reactor = document.getElementById('reactor');
+        const terminal = document.getElementById('terminal');
+        const statusText = document.getElementById('status-text');
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-IN';
+        recognition.continuous = false;
+
+        function speak(text) {
+            const u = new SpeechSynthesisUtterance(text);
+            u.rate = 1.05; u.pitch = 0.85;
+            window.speechSynthesis.speak(u);
+        }
+
+        function logMsg(text, type) {
+            terminal.innerHTML += `<p class="${type}">${type === 'u-msg' ? 'USER > ' : 'JARVIS > '} ${text}</p>`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        micBtn.onclick = () => {
+            try { recognition.start(); } catch(e) {}
+        };
+
+        recognition.onstart = () => {
+            reactor.classList.add('active');
+            statusText.innerText = "LISTENING...";
+            micBtn.innerText = "LISTENING...";
+        };
+
+        recognition.onresult = async (e) => {
+            const query = e.results[0][0].transcript;
+            logMsg(query, 'u-msg');
+            statusText.innerText = "PROCESSING...";
+            micBtn.innerText = "PROCESSING...";
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message: query})
+                });
+                const data = await res.json();
+                logMsg(data.response, 'b-msg');
+                speak(data.response);
+            } catch (err) {
+                logMsg("Error: Mainframe connection lost.", 'err-msg');
+            }
+        };
+
+        recognition.onerror = (e) => {
+            logMsg("Microphone Error: " + e.error, 'err-msg');
+        };
+
+        recognition.onend = () => {
+            reactor.classList.remove('active');
+            statusText.innerText = "ONLINE (CLOUD READY)";
+            micBtn.innerText = "ENGAGE VOICE PROTOCOL";
+        };
+    </script>
+</body>
+</html>
